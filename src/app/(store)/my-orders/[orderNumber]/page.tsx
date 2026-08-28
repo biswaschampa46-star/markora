@@ -8,6 +8,8 @@ import { getOrderDetail, getOrderMessages } from "@/lib/queries/orders";
 import { getStoreSettings } from "@/lib/settings";
 import { Badge } from "@/components/ui/Badge";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
+import { getBuyerVerification } from "@/lib/verified-buyer";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { CancelOrderButton } from "@/components/buyer/CancelOrderButton";
 import {
   ORDER_STATUS_FLOW,
@@ -49,6 +51,9 @@ export default async function OrderDetailPage({
   const [messages, settings] = isOwner
     ? await Promise.all([getOrderMessages(order.id), getStoreSettings()])
     : [[], null];
+  // Authoritative verification state — badge is shown only if the server
+  // confirms the buyer has completed the required successful orders.
+  const verification = isOwner && user ? await getBuyerVerification(user.id) : null;
   const whatsappDigits = (settings?.whatsapp ?? "").replace(/[^\d]/g, "");
   const whatsappLink = whatsappDigits
     ? `https://wa.me/${whatsappDigits.startsWith("88") ? whatsappDigits : `88${whatsappDigits}`}`
@@ -78,7 +83,8 @@ export default async function OrderDetailPage({
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm">
           <UserCircle className="h-8 w-8 shrink-0 text-teal-700" />
           <p className="text-slate-600">
-            এই অর্ডারটি করা হয়েছে <span className="font-semibold text-slate-900">{user!.name}</span> (
+            এই অর্ডারটি করা হয়েছে <span className="font-semibold text-slate-900">{user!.name}</span>{" "}
+            {verification?.isVerifiedBuyer && <VerifiedBadge className="align-middle" />} (
             {user!.email}) অ্যাকাউন্ট থেকে।
           </p>
         </div>
