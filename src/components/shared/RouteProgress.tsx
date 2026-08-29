@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 /**
  * Top loading progress bar (like Chrome / NProgress).
@@ -10,7 +10,6 @@ import { usePathname, useSearchParams } from "next/navigation";
  */
 export function RouteProgress() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -53,7 +52,7 @@ export function RouteProgress() {
     }
     done();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Also detect clicks on links (navigation start) — covers both <a> and Next <Link>.
   useEffect(() => {
