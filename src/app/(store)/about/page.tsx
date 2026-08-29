@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default async function AboutPage() {
   const settings = await getStoreSettings();
-  const storeName = settings?.storeName || "বাংলা শপ";
+  const storeName = settings?.storeName || "মার্কোরা";
 
   return (
     <InfoPage title="আমাদের সম্পর্কে">

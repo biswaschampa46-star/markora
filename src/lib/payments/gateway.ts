@@ -1,4 +1,4 @@
-ï»¿import "server-only";
+import "server-only";
 
 /**
  * Payment gateway abstraction for the delivery-charge pre-payment.
@@ -6,7 +6,7 @@
  * SECURITY CONTRACT
  * -----------------
  * The client only ever submits a transaction ID (TxnID). A payment is NEVER
- * accepted because the frontend claims "success" â€” verification happens in
+ * accepted because the frontend claims "success" — verification happens in
  * exactly one of two ways:
  *
  *   1. Automatic: when official gateway credentials are configured below, the
@@ -32,7 +32,7 @@ export type GatewayVerification = {
 };
 
 // ---------------------------------------------------------------------------
-// bKash (Tokenized Checkout â€” transaction query endpoints)
+// bKash (Tokenized Checkout — transaction query endpoints)
 // ---------------------------------------------------------------------------
 
 const BKASH_BASE_URL = process.env.BKASH_BASE_URL; // e.g. https://tokenized.sandbox.bka.sh/v1.2.0-beta
@@ -110,7 +110,7 @@ async function verifyWithBkash(transactionId: string, expectedAmount: number): P
 }
 
 // ---------------------------------------------------------------------------
-// Nagad (merchant API) â€” integration point
+// Nagad (merchant API) — integration point
 // ---------------------------------------------------------------------------
 
 // TODO: When Nagad merchant credentials become available, implement the
@@ -122,7 +122,7 @@ async function verifyWithNagad(_transactionId: string, _expectedAmount: number):
   return {
     available: false,
     verified: false,
-    message: "Nagad auto-verification is not configured â€” manual verification required.",
+    message: "Nagad auto-verification is not configured — manual verification required.",
   };
 }
 
@@ -136,7 +136,7 @@ export function isGatewayConfigured(method: PaymentGatewayMethod): boolean {
  * Verifies a transaction with the official gateway when configured. When no
  * gateway integration exists for the method the result is
  * `{ available: false }` and the caller MUST fall back to explicit manual
- * admin verification â€” it must never treat the payment as verified.
+ * admin verification — it must never treat the payment as verified.
  */
 export async function verifyTransactionWithGateway(
   method: PaymentGatewayMethod,

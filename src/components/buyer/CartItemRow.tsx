@@ -14,6 +14,7 @@ import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 export type CartItemView = {
   id: number;
   quantity: number;
+  size?: string | null;
   isAvailable: boolean;
   stockAvailable: number;
   lineTotal: number;
@@ -70,6 +71,7 @@ export function CartItemRow({ item }: { item: CartItemView }) {
           {item.product.name}
         </Link>
         {item.variant && <span className="text-xs text-slate-500">{item.variant.name}</span>}
+        {item.size && <span className="text-xs text-slate-500">সাইজ: {item.size}</span>}
         {!item.isAvailable && <Badge tone="danger">স্টক শেষ</Badge>}
         <PriceDisplay price={item.priceInfo.price} originalPrice={item.priceInfo.originalPrice} size="sm" />
         <div className="mt-1 flex items-center justify-between">

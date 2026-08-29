@@ -147,6 +147,7 @@ export default async function ProductDetailPage({
           <VariantSelector
             productId={product.id}
             variants={variants}
+            sizes={product.sizes}
             fallbackPrice={priceInfo.price}
             fallbackOriginalPrice={priceInfo.originalPrice}
             fallbackStock={stock}

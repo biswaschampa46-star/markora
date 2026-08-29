@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MessageSquare } from "lucide-react";
-import { sendOrderMessageFormAction, setExpectedDeliveryFormAction, updateOrderStatusFormAction } from "@/actions/admin";
+import { sendOrderMessageFormAction, sendOrderStatusEmailFormAction, setExpectedDeliveryFormAction, updateOrderStatusFormAction } from "@/actions/admin";
 import { getOrderDetail, getOrderMessages } from "@/lib/queries/orders";
 import { Badge } from "@/components/ui/Badge";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
@@ -25,9 +25,12 @@ export default async function AdminOrderDetailPage({
   const detail = await getOrderDetail(orderNumber);
   if (!detail) notFound();
 
-  const { order, items, history } = detail;
+  const { order, items, history, customerEmail } = detail;
   const nextStatuses = ALLOWED_TRANSITIONS[order.status] ?? [];
   const messages = await getOrderMessages(order.id);
+
+  // এক-ক্লিক ইমেইল — সার্ভার থেকে সুন্দর HTML ইমেইল পাঠানো হয় (SMTP)
+  const hasQuickEmail = Boolean(customerEmail);
 
   return (
     <div className="max-w-4xl">
@@ -150,7 +153,8 @@ export default async function AdminOrderDetailPage({
                 <span>
                   <span className="block text-sm text-slate-800">{item.productName}</span>
                   <span className="text-xs text-slate-500">
-                    {item.variantName ? `${item.variantName} · ` : ""}পরিমাণ: {item.quantity}
+                    {item.variantName ? `${item.variantName} · ` : ""}
+                    {item.size ? `সাইজ: ${item.size} · ` : ""}পরিমাণ: {item.quantity}
                   </span>
                 </span>
                 <PriceDisplay price={Number(item.total)} size="sm" />
@@ -181,6 +185,43 @@ export default async function AdminOrderDetailPage({
         <div className="flex flex-col gap-4">
           <section className="rounded-xl border border-slate-200 bg-white p-4 text-sm">
             <h2 className="font-semibold text-slate-900">গ্রাহক ও ঠিকানা</h2>
+            {customerEmail && (
+              <div className="mt-2 text-slate-600">
+                <p>
+                  <span className="text-slate-400">ইমেইল:</span>{" "}
+                  <a href={`mailto:${customerEmail}`} className="text-teal-700 hover:underline">
+                    {customerEmail}
+                  </a>
+                </p>
+                {/* এক-ক্লিক ইমেইল — সার্ভার থেকে সুন্দর HTML ইমেইল সরাসরি পাঠায় (SMTP) */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {hasQuickEmail && (
+                    <form action={sendOrderStatusEmailFormAction}>
+                      <input type="hidden" name="orderId" value={order.id} />
+                      <input type="hidden" name="kind" value="received" />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-700 hover:bg-teal-100"
+                      >
+                        ✉️ অর্ডার গ্রহণ ইমেইল পাঠান
+                      </button>
+                    </form>
+                  )}
+                  {hasQuickEmail && (
+                    <form action={sendOrderStatusEmailFormAction}>
+                      <input type="hidden" name="orderId" value={order.id} />
+                      <input type="hidden" name="kind" value="verified" />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+                      >
+                        ✉️ অর্ডার ভেরিফাই ইমেইল পাঠান
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            )}
             <p className="mt-2 text-slate-700">{order.recipientName}</p>
             <p className="text-slate-600">{order.phone}</p>
             <p className="mt-1 text-slate-600">

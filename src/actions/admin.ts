@@ -19,10 +19,12 @@ import {
   reviews,
   storeSettings,
   deliveryPayments,
+  users,
 } from "@/db/schema";
 import { assertAdmin, requireAdmin } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
-import { slugify } from "@/lib/format";
+import { formatBanglaDate, slugify } from "@/lib/format";
+import { sendOrderStatusEmail } from "@/lib/email";
 import { recomputeProductRating } from "@/lib/ratings";
 import { ALLOWED_TRANSITIONS } from "@/lib/status";
 import {
@@ -1018,4 +1020,35 @@ export async function resetDashboardDataFormAction(formData: FormData): Promise<
   revalidatePath("/admin");
   revalidatePath("/admin/orders");
   revalidatePath("/admin/reviews");
+}
+
+/**
+ * One-click status email to the buyer (order received / order verified).
+ * Sends a branded HTML email via SMTP. Never throws.
+ */
+export async function sendOrderStatusEmailFormAction(formData: FormData): Promise<void> {
+  await assertAdmin();
+  const orderId = Number(formData.get("orderId"));
+  const kind = String(formData.get("kind") || "received") === "verified" ? "verified" : "received";
+  if (!orderId) return;
+  const [row] = await db
+    .select({ order: orders, buyerEmail: users.email })
+    .from(orders)
+    .leftJoin(users, eq(orders.userId, users.id))
+    .where(eq(orders.id, orderId))
+    .limit(1);
+  if (!row || !row.buyerEmail) return;
+  const [settings] = await db.select().from(storeSettings).limit(1);
+  await sendOrderStatusEmail(
+    {
+      to: row.buyerEmail,
+      recipientName: row.order.recipientName,
+      orderNumber: row.order.orderNumber,
+      orderDate: formatBanglaDate(row.order.createdAt),
+      expectedDelivery: row.order.expectedDeliveryAt ? formatBanglaDate(row.order.expectedDeliveryAt) : null,
+      storeName: settings?.storeName || "Markora",
+    },
+    kind,
+  );
+  revalidatePath(`/admin/orders/${row.order.orderNumber}`);
 }

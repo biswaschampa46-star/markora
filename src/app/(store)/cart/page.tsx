@@ -57,6 +57,7 @@ export default async function CartPage() {
                 item={{
                   id: item.id,
                   quantity: item.quantity,
+                  size: item.size,
                   isAvailable: item.isAvailable,
                   stockAvailable: item.stockAvailable,
                   lineTotal: item.lineTotal,

@@ -41,7 +41,35 @@ export function ProductForm({ categories, product, mode = "create" }: Props) {
   const [thumbPreview, setThumbPreview] = useState<string | null>(product?.thumbnail ?? null);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
+    product?.categoryId ? String(product.categoryId) : "",
+  );
   const isEdit = mode === "edit" && product;
+
+  // Size inputs only make sense for apparel — shown when the selected category
+  // is (or is named like) "Fashion".
+  const selectedCategory = categories.find((c) => String(c.id) === selectedCategoryId);
+  const isFashionCategory = (() => {
+    let cat = selectedCategory;
+    while (cat) {
+      const hay = `${cat.name} ${cat.slug}`.toLowerCase();
+      if (hay.includes("fashion") || cat.name.includes("ফ্যাশন")) return true;
+      cat = categories.find((c) => c.id === cat!.parentId);
+    }
+    return false;
+  })();
+
+  const SIZE_PRESETS = ["S", "M", "L", "XL", "XXL", "3XL"];
+  function appendSizePreset(value: string) {
+    const input = formRef.current?.elements.namedItem("sizes") as HTMLInputElement | null;
+    if (!input) return;
+    const current = input.value
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (current.some((s) => s.toLowerCase() === value.toLowerCase())) return;
+    input.value = [...current, value].join(", ");
+  }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -147,7 +175,8 @@ export function ProductForm({ categories, product, mode = "create" }: Props) {
           <Field label="ক্যাটাগরি">
             <CustomSelect
               name="categoryId"
-              defaultValue={product?.categoryId ? String(product.categoryId) : ""}
+              value={selectedCategoryId}
+              onChange={(v) => setSelectedCategoryId(v)}
               options={[
                 { value: "", label: "-- ক্যাটাগরি নির্বাচন করুন --" },
                 ...categories.map((cat) => ({ value: String(cat.id), label: cat.name })),
@@ -417,6 +446,36 @@ export function ProductForm({ categories, product, mode = "create" }: Props) {
           </label>
         </div>
       </section>
+
+      {/* Sizes — only for Fashion categories */}
+      {isFashionCategory && (
+        <section className="rounded-xl border border-teal-200 bg-teal-50/50 p-5">
+          <h2 className="text-sm font-semibold text-slate-900">সাইজ (Fashion)</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            ক্রেতা এই সাইজগুলো থেকে বাছাই করবে। কমা দিয়ে আলাদা করুন, যেমন: S, M, L, XL
+          </p>
+          <div className="mt-3 flex flex-col gap-3">
+            <input
+              name="sizes"
+              defaultValue={product?.sizes?.join(", ") ?? ""}
+              placeholder="S, M, L, XL"
+              className={inputCls}
+            />
+            <div className="flex flex-wrap gap-2">
+              {SIZE_PRESETS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => appendSizePreset(s)}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:border-teal-600 hover:text-teal-700"
+                >
+                  + {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* SEO */}
       <section className="rounded-xl border border-slate-200 bg-white p-5">

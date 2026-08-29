@@ -47,6 +47,7 @@ export async function addToCartAction(
   productId: number,
   variantId: number | null,
   quantity: number,
+  size: string | null = null,
 ): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user) {
@@ -57,7 +58,7 @@ export async function addToCartAction(
   // Server actions are public endpoints: the arguments arrive over the wire and
   // are not constrained by whatever the UI sent. Without this, a negative or
   // fractional quantity flows straight into the row.
-  const parsed = cartAddSchema.safeParse({ productId, variantId, quantity });
+  const parsed = cartAddSchema.safeParse({ productId, variantId, quantity, size });
   if (!parsed.success) {
     return { ok: false, message: "অনুরোধটি সঠিক নয়।" };
   }
@@ -65,6 +66,7 @@ export async function addToCartAction(
     ...parsed.data,
     variantId: parsed.data.variantId ?? null,
   });
+  const selectedSize = parsed.data.size ?? null;
 
   const [product] = await db.select().from(products).where(eq(products.id, productId)).limit(1);
   if (!product || !product.isActive) {
@@ -88,11 +90,22 @@ export async function addToCartAction(
     return { ok: false, message: "অনুগ্রহ করে একটি ভ্যারিয়েন্ট নির্বাচন করুন।" };
   }
 
+  // Size is mandatory for products that define sizes (e.g. Fashion items) and
+  // must be one of the sizes the admin configured — never a free-form value.
+  if (product.sizes.length > 0) {
+    if (!selectedSize) {
+      return { ok: false, message: "অনুগ্রহ করে একটি সাইজ নির্বাচন করুন।" };
+    }
+    if (!product.sizes.includes(selectedSize)) {
+      return { ok: false, message: "নির্বাচিত সাইজটি উপলভ্য নয়।" };
+    }
+  }
+
   if (stock <= 0) {
     return { ok: false, message: "স্টক শেষ।" };
   }
 
-  // Match the exact line: same product AND same variant (or no variant).
+  // Match the exact line: same product AND same variant AND same size.
   const [matched] = await db
     .select()
     .from(cartItems)
@@ -101,6 +114,7 @@ export async function addToCartAction(
         eq(cartItems.userId, user.id),
         eq(cartItems.productId, productId),
         variant ? eq(cartItems.variantId, variant.id) : isNull(cartItems.variantId),
+        selectedSize ? eq(cartItems.size, selectedSize) : isNull(cartItems.size),
         eq(cartItems.savedForLater, false),
       ),
     )
@@ -119,6 +133,7 @@ export async function addToCartAction(
       userId: user.id,
       productId,
       variantId: variant?.id ?? null,
+      size: selectedSize,
       quantity: finalQuantity,
     });
   }

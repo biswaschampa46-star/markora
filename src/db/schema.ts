@@ -121,6 +121,7 @@ export const products = pgTable(
     returnEligible: boolean("return_eligible").notNull().default(true),
     condition: text("condition").notNull().default("new"),
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    sizes: jsonb("sizes").$type<string[]>().notNull().default([]),
     images: jsonb("images").$type<{ url: string; alt?: string }[]>().notNull().default([]),
     thumbnail: text("thumbnail"),
     videoUrl: text("video_url"),
@@ -208,6 +209,7 @@ export const cartItems = pgTable(
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
     variantId: integer("variant_id"),
+    size: text("size"),
     quantity: integer("quantity").notNull().default(1),
     savedForLater: boolean("saved_for_later").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -303,6 +305,7 @@ export const orderItems = pgTable(
     variantId: integer("variant_id"),
     productName: text("product_name").notNull(),
     variantName: text("variant_name"),
+    size: text("size"),
     image: text("image"),
     price: numeric("price").notNull(),
     quantity: integer("quantity").notNull(),

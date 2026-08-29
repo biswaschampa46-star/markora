@@ -257,6 +257,7 @@ export async function placeOrderAction(_prev: CheckoutState, formData: FormData)
         variantId: item.variant?.id ?? null,
         productName: item.product.name,
         variantName: item.variant?.name ?? null,
+        size: item.size ?? null,
         image: item.variant?.image ?? item.product.thumbnail,
         price: String(item.priceInfo.price),
         quantity: item.quantity,
@@ -284,7 +285,8 @@ export async function placeOrderAction(_prev: CheckoutState, formData: FormData)
       storeName: settings?.storeName || "Markora",
       items: cartWithDetails.map((i) => ({
         productName: i.product.name,
-        variantName: i.variant?.name ?? null,
+        variantName:
+          i.variant?.name ?? (i.size ? `সাইজ: ${i.size}` : null),
         quantity: i.quantity,
         total: String(i.lineTotal),
       })),

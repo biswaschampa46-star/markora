@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/db";
-import { orderItems, orderMessages, orders, orderStatusHistory } from "@/db/schema";
+import { orderItems, orderMessages, orders, orderStatusHistory, users } from "@/db/schema";
 import { and, asc, desc, eq, inArray, notInArray } from "drizzle-orm";
 
 /** Order statuses that mean the purchase never actually happened. */
@@ -35,8 +35,14 @@ export async function getOrderDetail(orderNumber: string, userId?: number) {
     ? and(eq(orders.orderNumber, orderNumber), eq(orders.userId, userId))
     : eq(orders.orderNumber, orderNumber);
 
-  const [order] = await db.select().from(orders).where(conditions).limit(1);
-  if (!order) return null;
+  const [row] = await db
+    .select({ order: orders, customerName: users.name, customerEmail: users.email })
+    .from(orders)
+    .innerJoin(users, eq(orders.userId, users.id))
+    .where(conditions)
+    .limit(1);
+  if (!row) return null;
+  const { order, customerName, customerEmail } = row;
 
   const [items, history] = await Promise.all([
     db.select().from(orderItems).where(eq(orderItems.orderId, order.id)),
@@ -47,7 +53,7 @@ export async function getOrderDetail(orderNumber: string, userId?: number) {
       .orderBy(orderStatusHistory.createdAt),
   ]);
 
-  return { order, items, history };
+  return { order, items, history, customerName, customerEmail };
 }
 
 // ---------------------------------------------------------------------------

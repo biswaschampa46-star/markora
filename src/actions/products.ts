@@ -94,6 +94,16 @@ export async function createProductAction(
   const categoryId = num("categoryId");
   const discountPrice = num("discountPrice");
 
+  // Sizes (comma separated) — used by Fashion-style products.
+  const sizesRaw = get("sizes");
+  const sizes = sizesRaw
+    ? sizesRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 20)
+    : [];
+
   let inserted: { id: number };
   try {
     [inserted] = await db
@@ -112,6 +122,7 @@ export async function createProductAction(
         returnEligible: bool("returnEligible"),
         condition: get("condition") || "new",
         tags,
+        sizes,
         images,
         thumbnail,
         videoUrl: get("videoUrl"),
@@ -236,6 +247,19 @@ export async function updateProductAction(
   const categoryId = num("categoryId");
   const discountPrice = num("discountPrice");
 
+  // Sizes (comma separated). Field present (even empty) → parse it, so admins
+  // can clear sizes; field absent → keep existing sizes.
+  const sizesField = formData.get("sizes");
+  const sizes =
+    sizesField !== null
+      ? String(sizesField)
+          .trim()
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .slice(0, 20)
+      : existing.sizes;
+
   try {
     await db
       .update(products)
@@ -253,6 +277,7 @@ export async function updateProductAction(
         returnEligible: bool("returnEligible"),
         condition: get("condition") || "new",
         tags,
+        sizes,
         images,
         thumbnail,
         videoUrl: get("videoUrl"),

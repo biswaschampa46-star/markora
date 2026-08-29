@@ -11,6 +11,8 @@ export function AddToCartButton({
   productId,
   variantId = null,
   quantity = 1,
+  selectedSize = null,
+  availableSizes,
   disabled,
   hasVariants,
   size = "md",
@@ -20,6 +22,10 @@ export function AddToCartButton({
   productId: number;
   variantId?: number | null;
   quantity?: number;
+  /** Selected product size (Fashion items). */
+  selectedSize?: string | null;
+  /** Available sizes — when non-empty a size must be chosen first. */
+  availableSizes?: string[];
   disabled?: boolean;
   hasVariants?: boolean;
   size?: "sm" | "md" | "lg";
@@ -30,13 +36,19 @@ export function AddToCartButton({
   const { showToast } = useToast();
   const router = useRouter();
 
+  const requiresSize = Boolean(availableSizes && availableSizes.length > 0);
+
   const handleClick = () => {
     if (hasVariants && !variantId) {
       showToast("অনুগ্রহ করে একটি ভ্যারিয়েন্ট নির্বাচন করুন।", "error");
       return;
     }
+    if (requiresSize && !selectedSize) {
+      showToast("অনুগ্রহ করে একটি সাইজ নির্বাচন করুন।", "error");
+      return;
+    }
     startTransition(async () => {
-      const result = await addToCartAction(productId, variantId, quantity);
+      const result = await addToCartAction(productId, variantId, quantity, requiresSize ? selectedSize : null);
       showToast(result.message, result.ok ? "success" : "error");
       if (result.requireLogin) {
         router.push("/login");

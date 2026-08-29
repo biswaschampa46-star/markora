@@ -186,6 +186,7 @@ export default async function OrderDetailPage({
                   <div className="flex flex-1 flex-col">
                     <p className="text-sm font-medium text-slate-800">{item.productName}</p>
                     {item.variantName && <p className="text-xs text-slate-500">{item.variantName}</p>}
+                    {item.size && <p className="text-xs text-slate-500">সাইজ: {item.size}</p>}
                     <p className="text-xs text-slate-500">
                       {formatBDT(item.price)} × {item.quantity}
                     </p>

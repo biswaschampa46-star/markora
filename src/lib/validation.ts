@@ -48,6 +48,7 @@ export const cartAddSchema = z.object({
   productId: z.number().int().positive(),
   variantId: z.number().int().positive().optional().nullable(),
   quantity: z.number().int().min(1).max(50).default(1),
+  size: z.string().trim().min(1).max(20).optional().nullable(),
 });
 
 export const cartUpdateSchema = z.object({

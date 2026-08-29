@@ -36,7 +36,7 @@ export function Footer({ settings }: { settings: StoreSettings | null }) {
     <footer className="mt-16 border-t border-slate-200 bg-slate-950 text-slate-300">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div>
-          <h3 className="text-lg font-bold text-white">{settings?.storeName || "বাংলা শপ"}</h3>
+          <h3 className="text-lg font-bold text-white">{settings?.storeName || "মার্কোরা"}</h3>
           <p className="mt-3 text-sm leading-relaxed text-slate-400">
             {settings?.metaDescription || "বাংলাদেশের বিশ্বস্ত অনলাইন শপিং প্ল্যাটফর্ম।"}
           </p>
@@ -122,7 +122,7 @@ export function Footer({ settings }: { settings: StoreSettings | null }) {
       </div>
 
       <div className="border-t border-slate-800 px-4 py-4 text-center text-xs text-slate-500 sm:px-6">
-        © {new Date().getFullYear()} {settings?.storeName || "বাংলা শপ"} — সর্বস্বত্ব সংরক্ষিত।
+        © {new Date().getFullYear()} {settings?.storeName || "মার্কোরা"} — সর্বস্বত্ব সংরক্ষিত।
       </div>
     </footer>
   );

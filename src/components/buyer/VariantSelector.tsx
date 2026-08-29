@@ -21,12 +21,15 @@ type Variant = {
 export function VariantSelector({
   productId,
   variants,
+  sizes = [],
   fallbackPrice,
   fallbackOriginalPrice,
   fallbackStock,
 }: {
   productId: number;
   variants: Variant[];
+  /** Fixed sizes (e.g. Fashion) the buyer must choose from. */
+  sizes?: string[];
   fallbackPrice: number;
   fallbackOriginalPrice: number | null;
   fallbackStock: number;
@@ -43,6 +46,7 @@ export function VariantSelector({
   }, [variants]);
 
   const [selected, setSelected] = useState<Record<string, string>>({});
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
 
   const matchedVariant = useMemo(() => {
@@ -63,7 +67,13 @@ export function VariantSelector({
     : fallbackStock;
 
   const allSelected = attributeGroups.every((g) => selected[g.key]);
-  const outOfStock = hasVariants ? (allSelected ? stock <= 0 : false) : stock <= 0;
+  const sizeSelected = sizes.length === 0 || Boolean(selectedSize);
+  const outOfStock =
+    hasVariants || sizes.length > 0
+      ? (hasVariants ? allSelected : true) && sizeSelected
+        ? stock <= 0
+        : false
+      : stock <= 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -94,9 +104,38 @@ export function VariantSelector({
         </div>
       ))}
 
+      {sizes.length > 0 && (
+        <div>
+          <p className="mb-2 text-sm font-medium text-slate-700">
+            সাইজ <span className="text-red-500">*</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {sizes.map((value) => {
+              const isSelected = selectedSize === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSelectedSize((prev) => (prev === value ? null : value))}
+                  className={`min-w-11 rounded-lg border px-3 py-1.5 text-sm ${
+                    isSelected
+                      ? "border-teal-700 bg-teal-50 text-teal-800"
+                      : "border-slate-300 text-slate-700 hover:border-slate-400"
+                  }`}
+                >
+                  {value}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div>
         {hasVariants && !allSelected ? (
           <Badge tone="warning">কিনতে সব অপশন নির্বাচন করুন</Badge>
+        ) : sizes.length > 0 && !selectedSize ? (
+          <Badge tone="warning">কিনতে সাইজ নির্বাচন করুন</Badge>
         ) : stock > 0 ? (
           <Badge tone="success">স্টকে আছে ({stock} টি)</Badge>
         ) : (
@@ -129,8 +168,10 @@ export function VariantSelector({
             productId={productId}
             variantId={matchedVariant?.id ?? null}
             quantity={quantity}
+            selectedSize={selectedSize}
+            availableSizes={sizes}
             hasVariants={hasVariants}
-            disabled={outOfStock || (hasVariants && !allSelected)}
+            disabled={outOfStock || (hasVariants && !allSelected) || (sizes.length > 0 && !selectedSize)}
             fullWidth
           />
         </div>

@@ -29,7 +29,7 @@ export default async function StoreLayout({ children }: { children: ReactNode })
   return (
     <div className="flex min-h-screen flex-col bg-[#f7f8fa] pb-16 lg:pb-0">
       <Navbar
-        storeName={settings?.storeName || "বাংলা শপ"}
+        storeName={settings?.storeName || "মার্কোরা"}
         logo={settings?.logo ?? null}
         cartCount={cartCount}
         wishlistCount={wishlistIds.size}

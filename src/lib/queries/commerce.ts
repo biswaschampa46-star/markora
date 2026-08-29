@@ -72,6 +72,7 @@ export async function getCartWithDetails(userId: number) {
     return {
       id: item.id,
       quantity: item.quantity,
+      size: item.size,
       product,
       variant,
       priceInfo,
