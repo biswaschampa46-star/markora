@@ -179,7 +179,10 @@ export function ProductForm({ categories, product, mode = "create" }: Props) {
               onChange={(v) => setSelectedCategoryId(v)}
               options={[
                 { value: "", label: "-- ক্যাটাগরি নির্বাচন করুন --" },
-                ...categories.map((cat) => ({ value: String(cat.id), label: cat.name })),
+                ...categories.map((cat) => ({
+                  value: String(cat.id),
+                  label: cat.isActive ? cat.name : `${cat.name} (নিষ্ক্রিয়)`,
+                })),
               ]}
               className={inputCls}
             />

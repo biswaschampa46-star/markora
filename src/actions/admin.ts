@@ -552,6 +552,8 @@ export async function createCategoryAction(formData: FormData): Promise<ActionRe
   });
 
   revalidatePath("/admin/categories");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/products/new");
   revalidatePath("/", "layout");
   return { ok: true, message: "ক্যাটাগরি সফলভাবে তৈরি হয়েছে।", id: inserted.id };
 }
@@ -620,6 +622,8 @@ export async function updateCategoryAction(formData: FormData): Promise<ActionRe
   });
 
   revalidatePath("/admin/categories");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/products/new");
   revalidatePath("/", "layout");
   return { ok: true, message: "ক্যাটাগরি সফলভাবে আপডেট হয়েছে।", id: categoryId };
 }
@@ -651,6 +655,8 @@ export async function deleteCategoryAction(categoryId: number): Promise<ActionRe
   });
 
   revalidatePath("/admin/categories");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/products/new");
   revalidatePath("/", "layout");
   return {
     ok: true,
@@ -682,6 +688,8 @@ export async function toggleCategoryActiveAction(categoryId: number): Promise<Ac
   });
 
   revalidatePath("/admin/categories");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/products/new");
   revalidatePath("/", "layout");
   return { ok: true, message: !existing.isActive ? "ক্যাটাগরি সক্রিয় করা হয়েছে।" : "ক্যাটাগরি নিষ্ক্রিয় করা হয়েছে।" };
 }

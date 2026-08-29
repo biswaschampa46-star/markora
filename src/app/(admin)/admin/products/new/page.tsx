@@ -1,15 +1,17 @@
 import { db } from "@/db";
 import { categories } from "@/db/schema";
-import { eq, asc } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import { ProductForm } from "@/components/admin/ProductForm";
+import type { CategoryRow } from "@/lib/queries/catalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminNewProductPage() {
-  const allCategories = await db
+  // Load ALL categories (active + inactive) — an admin must be able to assign
+  // any category to a product, even one that is currently hidden from the store.
+  const allCategories: CategoryRow[] = await db
     .select()
     .from(categories)
-    .where(eq(categories.isActive, true))
     .orderBy(asc(categories.sortOrder), asc(categories.name));
 
   return (

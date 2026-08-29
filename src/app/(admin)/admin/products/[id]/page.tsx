@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { categories, products } from "@/db/schema";
-import { eq, asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { ProductForm } from "@/components/admin/ProductForm";
+import type { CategoryRow } from "@/lib/queries/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,9 @@ export default async function AdminEditProductPage({
   const [product] = await db.select().from(products).where(eq(products.id, productId)).limit(1);
   if (!product) notFound();
 
-  const allCategories = await db
+  const allCategories: CategoryRow[] = await db
     .select()
     .from(categories)
-    .where(eq(categories.isActive, true))
     .orderBy(asc(categories.sortOrder), asc(categories.name));
 
   return (
