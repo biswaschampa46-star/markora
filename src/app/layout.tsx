@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     template: "%s | Markora",
   },
   description: "বাংলাদেশের বিশ্বস্ত অনলাইন শপিং প্ল্যাটফর্ম।",
+  verification: {
+    google: "LjBxhyT_W8HWMKh20jjySeJPCStvu6P0fe-NyDko1HI",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
